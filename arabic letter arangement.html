@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>അറബിക് അക്ഷരങ്ങൾ ക്രമീകരിക്കുക</title>
+
+  <style>
+
+    body {
+
+      font-family: 'Arial', sans-serif;
+
+      background: #fefce8;
+
+      margin: 0;
+
+      padding: 20px;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: flex-start;
+
+      min-height: 100vh;
+
+    }
+
+
+    h1, h2 {
+
+      font-size:15px;
+
+      color: #333;
+
+    }
+
+
+    .letter-box {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      justify-content: center;
+
+      gap: 15px;
+
+      margin-bottom: 30px;
+
+    }
+
+
+    .letter {
+
+      font-size: 36px;
+
+      width: 60px;
+
+      height: 60px;
+
+      border-radius: 10px;
+
+      background-color: #e0f2fe;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      cursor: pointer;
+
+      transition: transform 0.2s;
+
+      user-select: none;
+
+      font-weight: bold;
+
+    }
+
+
+    .letter:hover {
+
+      transform: scale(1.1);
+
+    }
+
+
+    .selected-box {
+
+      border: 2px dashed #888;
+
+      padding: 20px;
+
+      border-radius: 15px;
+
+      min-height: 80px;
+
+      width: 90%;
+
+      max-width: 600px;
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 15px;
+
+      justify-content: center;
+
+      background-color: #fff;
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .reset-btn {
+
+      margin-top: 20px;
+
+      padding: 10px 20px;
+
+      font-size: 18px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      background-color: #f43f5e;
+
+      color: white;
+
+      cursor: pointer;
+
+    }
+
+
+    .score, .timer {
+
+      font-size: 20px;
+
+      margin-bottom: 10px;
+
+    }
+
+
+    .score {
+
+      color: #10b981;
+
+    }
+
+
+    .timer {
+
+      color: #2563eb;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+
+  <h1>എത്ര സമയം എടുക്കും എന്ന് നമ്മുക്ക് നോക്കാം</h1>
+
+
+  <div class="timer" id="timer">സമയം: 0 സെക്കൻഡ്</div>
+
+  <div class="score" id="score">സ്കോർ: 0</div>
+
+
+  <div class="letter-box" id="letterBox"></div>
+
+
+  <h2>തിരഞ്ഞെടുത്ത അക്ഷരങ്ങൾ:</h2>
+
+  <div class="selected-box" id="selectedBox"></div>
+
+
+  <button class="reset-btn" onclick="resetSelection()">പുനഃക്രമീകരിക്കുക</button>
+
+
+  <script>
+
+    const correctOrder = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+
+    const colors = [
+
+      '#f87171','#facc15','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c',
+
+      '#4ade80','#fcd34d','#38bdf8','#818cf8','#f43f5e','#2dd4bf','#e879f9',
+
+      '#fbbf24','#a3e635','#c084fc','#fca5a5','#7dd3fc','#fcd34d','#86efac'
+
+    ];
+
+
+    let currentIndex = 0;
+
+    let score = 0;
+
+    let startTime = 0;
+
+    let timerInterval = null;
+
+
+    function shuffleArray(arr) {
+
+      return arr.sort(() => Math.random() - 0.5);
+
+    }
+
+
+    function renderLetters() {
+
+      const shuffled = shuffleArray([...correctOrder]);
+
+      const letterBox = document.getElementById('letterBox');
+
+      letterBox.innerHTML = '';
+
+
+      shuffled.forEach((letter, index) => {
+
+        const span = document.createElement('div');
+
+        span.className = 'letter';
+
+        span.textContent = letter;
+
+        span.style.backgroundColor = colors[index % colors.length];
+
+        span.onclick = () => handleLetterClick(span, letter);
+
+        letterBox.appendChild(span);
+
+      });
+
+    }
+
+
+    function handleLetterClick(span, letter) {
+
+      if (currentIndex === 0 && startTime === 0) startTimer();
+
+
+      const selectedBox = document.getElementById('selectedBox');
+
+      if (letter === correctOrder[currentIndex]) {
+
+        const clone = span.cloneNode(true);
+
+        clone.onclick = null;
+
+        selectedBox.appendChild(clone);
+
+        span.style.visibility = 'hidden';
+
+        currentIndex++;
+
+        score++;
+
+      } else {
+
+        score--;
+
+        span.style.backgroundColor = '#fecaca';
+
+      }
+
+      updateScore();
+
+
+      if (currentIndex === correctOrder.length) {
+
+        stopTimer();
+
+      }
+
+    }
+
+
+    function updateScore() {
+
+      document.getElementById('score').textContent = `സ്കോർ: ${score}`;
+
+    }
+
+
+    function startTimer() {
+
+      startTime = Date.now();
+
+      timerInterval = setInterval(updateTimer, 1000);
+
+    }
+
+
+    function updateTimer() {
+
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+
+      document.getElementById('timer').textContent = `സമയം: ${elapsed} സെക്കൻഡ്`;
+
+    }
+
+
+    function stopTimer() {
+
+      clearInterval(timerInterval);
+
+    }
+
+
+    function resetSelection() {
+
+      currentIndex = 0;
+
+      score = 0;
+
+      startTime = 0;
+
+      clearInterval(timerInterval);
+
+      document.getElementById('timer').textContent = `സമയം: 0 സെക്കൻഡ്`;
+
+      document.getElementById('selectedBox').innerHTML = '';
+
+      updateScore();
+
+      renderLetters();
+
+    }
+
+
+    renderLetters();
+
+  </script>
+
+</body>
+
+</html>
